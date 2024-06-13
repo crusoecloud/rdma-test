@@ -1,0 +1,20 @@
+
+# Throttle to 32 hosts at a time to to avoid false positives due to spine congestion.
+- name: Run rdma-loopback benchmark
+  throttle: 32
+  ansible.builtin.script: "rdma-loopback.sh"
+  register: rdma_test
+- name: Create output directory on Ansible controller.
+  become: no
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ lookup('env', 'PWD') }}/output/{{ inventory_hostname }}"
+    state: directory
+    mode: "0750"
+- name: Write stdout to Ansible controller.
+  become: no
+  delegate_to: localhost
+  ansible.builtin.copy:
+    content: "{{ rdma_test.stdout }}"
+    dest: "{{ lookup('env', 'PWD') }}/output/{{ inventory_hostname }}/stdout.log"
+    mode: "0640"

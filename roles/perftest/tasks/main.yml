@@ -1,0 +1,42 @@
+- name: Install perftest dependencies.
+  ansible.builtin.apt:
+    pkg:
+      - libpci-dev
+      - jq
+    update_cache: true
+
+- name: Create /opt/perftest/src directory
+  file:
+    path: /opt/perftest/src
+    state: directory
+
+- name: "Download perftest-{{ perftest_version }}"
+  ansible.builtin.get_url:
+    url: "https://github.com/linux-rdma/perftest/archive/refs/tags/{{ perftest_version }}.tar.gz"
+    dest: "/opt/perftest/src/perftest-{{ perftest_version }}.tar.gz"
+
+- name: "Unarchive perftest-{{ perftest_version }}"
+  ansible.builtin.unarchive:
+    src: "/opt/perftest/src/perftest-{{ perftest_version }}.tar.gz"
+    dest: "/opt/perftest/src"
+    remote_src: true
+
+- name: "Autogen perftest-{{ perftest_version }}"
+  ansible.builtin.shell:
+    chdir: /opt/perftest/src/perftest-{{ perftest_version }}
+    cmd: ./autogen.sh
+
+- name: "Configure perftest-{{ perftest_version }}"
+  ansible.builtin.shell:
+    chdir: /opt/perftest/src/perftest-{{ perftest_version }}
+    cmd: ./configure --prefix=/opt/perftest CUDA_H_PATH=/usr/local/cuda/include/cuda.h
+
+- name: "Build perftest-{{ perftest_version }}"
+  ansible.builtin.shell:
+    chdir: /opt/perftest/src/perftest-{{ perftest_version }}
+    cmd: make -j
+
+- name: "Install perftest-{{ perftest_version }}"
+  ansible.builtin.shell:
+    chdir: /opt/perftest/src/perftest-{{ perftest_version }}
+    cmd: make install

@@ -1,0 +1,4 @@
+[all]
+h100-1 ansible_host=91.106.223.141 instance_class=h100-80gb-sxm-ib
+h100-2 ansible_host=91.106.223.144 instance_class=h100-80gb-sxm-ib
+h100-3 ansible_host=91.106.223.146 instance_class=h100-80gb-sxm-ib
